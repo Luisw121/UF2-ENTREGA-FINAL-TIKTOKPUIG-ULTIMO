@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "187286431201",
+    "project_id": "tiktokpuig-f132a",
+    "storage_bucket": "tiktokpuig-f132a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:187286431201:android:dc8f380006e2cda3051ea0",
+        "android_client_info": {
+          "package_name": "com.example.tiktokelpuig"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "187286431201-g0j61chdg5f14tr6unfupptvr4l3f32e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBo3l3tlDcFz6F-NMMaTfu2PBJlI6DZmmQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "187286431201-g0j61chdg5f14tr6unfupptvr4l3f32e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
