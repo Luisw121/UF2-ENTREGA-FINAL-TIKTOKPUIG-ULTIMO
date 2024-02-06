@@ -1,7 +1,11 @@
 package com.example.tiktokelpuig;
 
+import static androidx.fragment.app.FragmentManager.TAG;
+
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -21,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -35,6 +40,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -47,6 +53,8 @@ public class sigInFragment extends Fragment {
     private ProgressBar signInProgressBar;
     private FirebaseAuth mAuth;
     public SignInButton googleSignInButton;
+    private static final String TAG = "sigInFragment";
+
     private ActivityResultLauncher<Intent> activityResultLauncher;
 
     @Override
@@ -125,6 +133,59 @@ public class sigInFragment extends Fragment {
         signInForm.setVisibility(View.GONE);
         signInProgressBar.setVisibility(View.VISIBLE);
 
+        String email = emailEditText.getText().toString();
+        String password = passwordEditText.getText().toString();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(requireContext(), "Por favor, complete todos los campos.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        signInForm.setVisibility(View.GONE);
+        signInProgressBar.setVisibility(View.VISIBLE);
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(requireActivity(), new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            // Asignar el nombre de usuario como el correo electrónico
+                            String displayName = email;
+                            // Establecer la foto de perfil predeterminada desde los recursos locales
+                            Uri photoUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
+                                    "://" + getResources().getResourcePackageName(R.drawable.person)
+                                    + '/' + getResources().getResourceTypeName(R.drawable.person)
+                                    + '/' + getResources().getResourceEntryName(R.drawable.person));
+
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(displayName)
+                                    .setPhotoUri(photoUri)
+                                    .build();
+
+                            user.updateProfile(profileUpdates)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                navController.navigate(R.id.homeFragment);
+                                            } else {
+                                                Snackbar.make(requireView(), "Error al actualizar el perfil: " + task.getException().getMessage(), Snackbar.LENGTH_LONG).show();
+                                                signInForm.setVisibility(View.VISIBLE);
+                                                signInProgressBar.setVisibility(View.GONE);
+                                            }
+                                        }
+                                    });
+                        } else {
+                            Snackbar.make(requireView(), "Error al iniciar sesión: " + task.getException().getMessage(), Snackbar.LENGTH_LONG).show();
+                            signInForm.setVisibility(View.VISIBLE);
+                            signInProgressBar.setVisibility(View.GONE);
+                        }
+                    }
+                });
+
+
+
         mAuth.signInWithEmailAndPassword(emailEditText.getText().toString(), passwordEditText.getText().toString())
                 .addOnCompleteListener(requireActivity(), new OnCompleteListener<AuthResult>() {
                     @Override
@@ -138,6 +199,7 @@ public class sigInFragment extends Fragment {
                         signInProgressBar.setVisibility(View.GONE);
                     }
                 });
+
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
